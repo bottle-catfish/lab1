@@ -6,6 +6,13 @@
 
 int main(int argc, char *argv[])
 {
-	// TODO: it's all yours
+	if (argc==2) {
+		execlp(argv[1], argv[1], NULL);	
+	}	
+	else if (argc>2) {
+		int pipefd=2;
+		pipe(pipefd);
+
+	}
 	return 0;
 }
