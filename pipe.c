@@ -7,61 +7,78 @@
 int main(int argc, char *argv[])
 {
 	if (argc==2) {
+		printf("Only one argument");
 		execlp(argv[1], argv[1], NULL);	
-	}	
-	else if (argc>2) {
-		int pipefd[2];
-		pipe(pipefd);
-		int saved_stdout = dup(1);
-		//read will be pipe[0] | write will be pipe[1]
-		for (int i=1; i < argc; i++) {
-			int code = fork();
-			//beginning case
-			if (i==1) {
-				if (code==0) {
-					execlp(argv[i], argv[i], NULL);
-				}
-				else {
-					close(pipefd[0]);
-					close(1);
-					dup(pipefd[1]);
-					close(pipefd[1]);
-				}
-			}
-			else if (i==argc-1) { //end case
-				if (code==0) {
-					close(pipefd[1]);
-					close(0);
-					dup(pipefd[0]);
-					close(pipefd[0]);
-					execlp(argv[i], argv[i], NULL);
-				}
-				else {
-					close(pipefd[0]);
-					close(1);
-					dup(saved_stdout);
-					close(pipefd[1]);
-				}
-
-			}
-			else {//general case
-				if (code==0) { //child
-					close(pipefd[1]);
-					close(0);
-					dup(pipefd[0]);
-					close(pipefd[0]);
-					execlp(argv[i], argv[i], NULL);
-				}
-				else { //parent
-					close(pipefd[0]);
-					close(1);
-					dup(pipefd[1]);
-					close(pipefd[1]);
-				}
-			}
-
-		}	
-
 	}
+	else if (argc>2) {
+		int o_stdin = dup(0);
+		int o_stdout = dup(1);
+		int piper [2];
+		pipe(piper);
+		for (int i = 1; i < argc; i++) {
+			if (i==1) {
+				int pid = fork();
+				if (pid==0) {
+					close(piper[0]);
+					close(piper[1]);
+					execlp(argv[i], argv[i], NULL);
+				}
+				else {
+					close(piper[0]);
+					close(1);
+					dup(piper[1]);
+					close(piper[1]);
+					int status = 0;
+					waitpid(pid, &status, 0);
+				}
+			}
+			else if (i==argc-1) {
+				int pid = fork();
+				printf("Last Argument\n");
+				if (pid==0) {
+					close(piper[1]);
+					close(0);
+					dup(piper[0]);
+					close(piper[0]);
+					execlp(argv[i], argv[i], NULL);
+				}
+				else {
+					dup2(o_stdout, 1);
+					close(piper[0]);
+					close(piper[1]);
+					int status = 0;
+					waitpid(pid, &status, 0);
+				}
+			}
+			else {
+				int pid = fork();
+				printf("And beyond!\n");
+				if (pid==0) {
+					close(piper[1]);
+					close(0);
+					dup(piper[0]);
+					close(piper[0]);
+					execlp(argv[i], argv[i], NULL);
+				}
+				else {
+					close(piper[0]);
+					close(1);
+					dup(piper[1]);
+					close(piper[1]);
+					int status = 0;
+					waitpid(pid, &status, 0);
+				}
+
+			}
+		}
+		
+		//parent output reset?
+		//child reading must be reset every single time
+	}
+
+
+
+
+
 	return 0;
 }
