@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 			else {
 				int status = 0;
 				waitpid(pid, &status, 0);
-				if (WIFEXITED(status)==-1) {
+				if (!WIFEXITED(status)) {
 					return WEXITSTATUS(status);
 				}
 				// check the status here to do error handling chief
