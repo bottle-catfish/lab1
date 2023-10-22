@@ -18,7 +18,10 @@ int main(int argc, char *argv[])
 	else if (argc>2) {
 		for (int i = 1; i < argc; i++) {
 			int piper[2];
-			pipe(piper);
+			int check = pipe(piper);
+			if (check==-1) {
+				exit(errno);
+			}
 			int pid = fork();
 			if (pid==0) {
 				if (i!=argc-1) {
