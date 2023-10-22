@@ -1,17 +1,17 @@
-## UID: 123456789
+## UID: 005485290
 
 ## Pipe Up
 
-One sentence description
+Implement the linux pipe command using the c pipe system call to link the output of one process to another.
 
 ## Building
 
-Explain briefly how to build your program
+Run the command 'make' to build the executable and then run './pipe' with the desired inputs
 
 ## Running
 
-Show an example run of your program, using at least two additional arguments, and what to expect
+Executing './pipe ls cat' results in the output of ls (the contents of your directory) being piped into the cat command which then prints them out to standard output.
 
 ## Cleaning up
 
-Explain briefly how to clean up all binary files
+By running 'make clean' one can remove all binary files.
