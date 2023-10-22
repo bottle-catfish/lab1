@@ -7,14 +7,13 @@
 
 int main(int argc, char *argv[])
 {
-	//TO DO : ERROR HANDLING IN GENERAL 
-	//TO DO : ERROR HANDLING FOR TOO FEW ARGUMENTS
 	if (argc<2) {
-		return EINVAL;
+		exit(EINVAL);
 	}
 	if (argc==2) {
-		printf("Only one argument");
-		execlp(argv[1], argv[1], NULL);	
+		if(execlp(argv[1], argv[1], NULL)==-1) {
+			exit(errno);
+		}	
 	}
 	else if (argc>2) {
 		for (int i = 1; i < argc; i++) {
@@ -32,17 +31,20 @@ int main(int argc, char *argv[])
 				}
 				
 			}
-			else {
+			else if (pid > 0) {
 				int status = 0;
 				waitpid(pid, &status, 0);
-				if (!WIFEXITED(status)) {
-					return WEXITSTATUS(status);
+				if (WEXITSTATUS(status)!=0) {
+					exit(WEXITSTATUS(status));
 				}
 				// check the status here to do error handling chief
 				close(piper[1]);
 				close(0);
 				dup(piper[0]);
 				close(piper[0]);
+			}
+			else {
+				exit(errno);
 			}
 		}
 	}
